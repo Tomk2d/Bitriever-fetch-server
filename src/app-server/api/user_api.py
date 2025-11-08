@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import logging
 from typing import Annotated, Any
 from fastapi import Depends
-from dependencies import get_user_service, get_trading_histories_service
+from dependencies import get_user_service, get_trading_histories_service, get_trading_profit_service
 from dto.http_response import ErrorResponse, SuccessResponse
 from dto.user_dto import (
     SignupRequest,
@@ -169,6 +169,7 @@ async def update_trading_history(
     request: UpdateTradingHistoryRequest,
     trading_histories_service: Annotated[Any, Depends(get_trading_histories_service)],
     user_service: Annotated[Any, Depends(get_user_service)],
+    trading_profit_service: Annotated[Any, Depends(get_trading_profit_service)],
 ):
     try:
         try:
@@ -187,6 +188,9 @@ async def update_trading_history(
         # 사용자의 마지막 거래내역 업데이트 시간 조회
         user = user_service.user_repository.find_by_id(request.user_id)
         start_time = user.last_trading_history_update_at if user else None
+        
+        # 최초 동기화 여부 판단 (start_time이 None이면 최초)
+        is_initial = start_time is None
 
         trading_histies = trading_histories_service.get_trading_histories(
             request.user_id, request.exchange_provider_str, start_time
@@ -199,6 +203,28 @@ async def update_trading_history(
             processed_trading_histies
         )
 
+        # 거래 내역이 저장된 경우에만 수익률 계산 수행
+        profit_calculation_result = None
+        if saved_trading_histories:
+            try:
+                profit_calculation_result = trading_profit_service.calculate_and_update_profit_loss(
+                    user_id=request.user_id,
+                    exchange_code=exchange_provider.value,
+                    is_initial=is_initial,
+                )
+                logger.info(
+                    f"수익률 계산 완료: user_id={request.user_id}, "
+                    f"exchange_code={exchange_provider.value}, "
+                    f"is_initial={is_initial}, "
+                    f"result={profit_calculation_result}"
+                )
+            except Exception as e:
+                # 수익률 계산 실패해도 거래 내역 저장은 성공했으므로 로그만 남기고 계속 진행
+                logger.error(
+                    f"수익률 계산 중 에러 발생 (거래 내역은 저장됨): user_id={request.user_id}, "
+                    f"exchange_code={exchange_provider.value}, error={e}"
+                )
+
         all_trading_histories_data = (
             trading_histories_service.get_all_trading_histories_by_user_formatted(
                 request.user_id
@@ -207,11 +233,17 @@ async def update_trading_history(
 
         user_service.update_user_trading_history_updated_at(request.user_id)
 
+        response_data = {
+            "saved_count": len(saved_trading_histories),
+            **all_trading_histories_data,
+        }
+        
+        # 수익률 계산 결과가 있으면 응답에 포함
+        if profit_calculation_result:
+            response_data["profit_calculation"] = profit_calculation_result
+
         return SuccessResponse(
-            data={
-                "saved_count": len(saved_trading_histories),
-                **all_trading_histories_data,
-            },
+            data=response_data,
             message=f"{exchange_provider.name} 거래내역 업데이트 완료 (저장: {len(saved_trading_histories)}개, 전체: {all_trading_histories_data['total_count']}개)",
         )
     except HTTPException as e:

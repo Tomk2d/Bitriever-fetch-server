@@ -69,7 +69,7 @@ register_routers(app)
 
 @app.get("/")
 async def root():
-    return {"message": "BIT Diary API", "version": "0.1.1"}
+    return {"message": "Bitriever API", "version": "0.1.1"}
 
 
 @app.get("/health")

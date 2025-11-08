@@ -49,11 +49,9 @@ def split_time_range(
 
     while current_start < end_time:
         current_end = min(current_start + timedelta(days=max_days), end_time)
-        # end_time을 1초 줄여서 겹치지 않도록 함
         adjusted_end = current_end - timedelta(seconds=1)
         time_ranges.append((current_start, adjusted_end))
 
-        # 다음 구간의 시작 시간을 현재 구간의 원래 종료 시간으로 설정
         current_start = current_end
 
     return time_ranges

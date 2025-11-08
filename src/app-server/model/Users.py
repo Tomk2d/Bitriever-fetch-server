@@ -34,6 +34,8 @@ class Users(db.Base):
         "ExchangeCredentials", back_populates="user", uselist=False
     )
     trading_histories = relationship("TradingHistories", back_populates="user")
+    assets = relationship("Assets", back_populates="user")
+    coin_holdings_past = relationship("CoinHoldingsPast", back_populates="user")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, nickname={self.nickname})>"

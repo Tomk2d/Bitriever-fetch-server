@@ -43,6 +43,8 @@ class DatabaseConnection:
         import model.ExchangeCredentials
         import model.Coins
         import model.TradingHistories
+        import model.Assets
+        import model.CoinHoldingsPast
 
         self.Base.metadata.create_all(bind=self.engine)
 

@@ -43,6 +43,10 @@ class TradingHistories(db.Base):
     fee = Column(Numeric(20, 8), default=0)  # 수수료
     trade_time = Column(TIMESTAMP, nullable=False)  # 체결시간
     created_at = Column(TIMESTAMP, default=func.now())  # 해당 칼럼 생성시간
+    
+    # 수익률 계산 관련 칼럼
+    profit_loss_rate = Column(Numeric(5, 2), nullable=True)  # 상승하락률 (50% 상승 = 0.50, 50% 하락 = -0.50)
+    avg_buy_price = Column(Numeric(20, 8), nullable=True)  # 구매 시 평균 단가
 
     # 관계 설정
     user = relationship("Users", back_populates="trading_histories")

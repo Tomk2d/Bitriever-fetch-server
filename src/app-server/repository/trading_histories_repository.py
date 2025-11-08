@@ -112,3 +112,49 @@ class TradingHistoriesRepository:
             raise e
         finally:
             session.close()
+
+    def update_profit_loss(
+        self, trading_histories: List[TradingHistories]
+    ) -> List[TradingHistories]:
+        """
+        거래내역의 수익률 및 평균 구매 단가 업데이트
+        
+        Args:
+            trading_histories: 업데이트할 거래내역 목록
+        
+        Returns:
+            업데이트된 거래내역 목록
+        """
+        try:
+            session = db.get_session()
+
+            updated_histories = []
+
+            for history in trading_histories:
+                # 기존 거래내역 확인
+                existing = (
+                    session.query(TradingHistories)
+                    .filter(TradingHistories.id == history.id)
+                    .first()
+                )
+
+                if existing:
+                    # 수익률 및 평균 구매 단가 업데이트
+                    existing.profit_loss_rate = history.profit_loss_rate
+                    existing.avg_buy_price = history.avg_buy_price
+                    updated_histories.append(existing)
+
+            session.commit()
+
+            for history in updated_histories:
+                session.refresh(history)
+
+            self.logger.info(f"거래내역 수익률 업데이트 완료: {len(updated_histories)}개")
+            return updated_histories
+
+        except Exception as e:
+            self.logger.error(f"거래내역 수익률 업데이트 중 에러 발생: {e}")
+            session.rollback()
+            raise e
+        finally:
+            session.close()

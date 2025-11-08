@@ -57,7 +57,7 @@ class UpbitService:
                     if isinstance(r, dict) and r.get("uuid"):
                         all_uuids.append(r.get("uuid"))
 
-                if (i + 1) % 5 == 0:
+                if (i + 1) % 25 == 0:
                     time.sleep(1)
 
             return all_uuids
@@ -70,7 +70,7 @@ class UpbitService:
 
             time.sleep(1)
             for i, uuid in enumerate(uuids):
-                if (i + 1) % 5 == 0:
+                if (i + 1) % 25 == 0:
                     time.sleep(1)
 
                 params = {"uuid": uuid}
@@ -132,4 +132,21 @@ class UpbitService:
                 client.download_image(url, f"../../data/image/{symbol}.png")
             self.logger.info(f"이미지 다운로드 완료: {len(coin_list)}개")
         except Exception as e:
+            raise e
+
+    def fetch_accounts(self, access_key: str, secret_key: str) -> List[Dict[str, Any]]:
+        """Upbit 계정 잔고 조회"""
+        try:
+            response = self.upbit_http_client.get(
+                "/v1/accounts", access_key, secret_key, None, True
+            )
+
+            if response is None:
+                self.logger.warning("계정 잔고 조회 결과가 None입니다")
+                return []
+
+            return response if isinstance(response, list) else [response]
+
+        except Exception as e:
+            self.logger.error(f"계정 잔고 조회 중 에러 발생: {e}")
             raise e

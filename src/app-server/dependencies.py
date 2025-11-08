@@ -11,6 +11,8 @@ _user_service_instance = None
 _user_repository_instance = None
 _trading_histories_service_instance = None
 _exchange_credentials_service_instance = None
+_assets_service_instance = None
+_trading_profit_service_instance = None
 
 
 # 의존성 주입 함수들
@@ -71,3 +73,21 @@ def get_exchange_credentials_service() -> Any:
 
         _exchange_credentials_service_instance = ExchangeCredentialsService()
     return _exchange_credentials_service_instance
+
+
+def get_assets_service() -> Any:
+    global _assets_service_instance
+    if _assets_service_instance is None:
+        from service.assets_service import AssetsService
+
+        _assets_service_instance = AssetsService()
+    return _assets_service_instance
+
+
+def get_trading_profit_service() -> Any:
+    global _trading_profit_service_instance
+    if _trading_profit_service_instance is None:
+        from service.trading_profit_service import TradingProfitService
+
+        _trading_profit_service_instance = TradingProfitService()
+    return _trading_profit_service_instance
