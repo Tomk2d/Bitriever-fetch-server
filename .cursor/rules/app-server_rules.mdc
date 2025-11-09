@@ -1,8 +1,6 @@
 ---
-globs: scr/app-server
 alwaysApply: false
----
-
+--w-
 # app-server develop rules
 
 ## Project Rules

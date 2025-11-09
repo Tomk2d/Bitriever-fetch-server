@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "BIT Diary"
+name = "Bitriever"
 version = "0.1.1"
 description = "This project is designed to assist individuals with cryptocurrency investment."
 authors = ["tomkid <wwy00@naver.com>"]
@@ -98,6 +98,11 @@ fastapi = {extras = ["standard"], version = "^0.116.1"}
 uvicorn = "^0.35.0"
 pyjwt = "^2.10.1"
 requests = "^2.32.4"
+
+# Django 관련 패키지
+django = "^5.0.0"
+djangorestframework = "^3.15.0"
+django-cors-headers = "^4.3.1"
 
 # 암호화 및 AWS 관련 패키지
 boto3 = "^1.34.0"
