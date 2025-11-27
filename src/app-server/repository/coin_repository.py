@@ -9,6 +9,7 @@ class CoinRepository:
         self.logger = logging.getLogger(__name__)
 
     def save_coin_list(self, coin_list: List[Coins]):
+        session = None
         try:
             session = db.get_session()
 
@@ -18,9 +19,15 @@ class CoinRepository:
             return saved_coin_list
         except Exception as e:
             self.logger.error(f"코인 목록 저장 중 에러 발생: {e}")
+            if session:
+                session.rollback()
             raise e
+        finally:
+            if session:
+                session.close()
 
     def get_all_coins(self):
+        session = None
         try:
             session = db.get_session()
             coins = session.query(Coins).all()
@@ -28,3 +35,6 @@ class CoinRepository:
         except Exception as e:
             self.logger.error(f"코인 목록 조회 중 에러 발생: {e}")
             raise e
+        finally:
+            if session:
+                session.close()

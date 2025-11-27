@@ -195,6 +195,7 @@ async def update_trading_history(
         trading_histies = trading_histories_service.get_trading_histories(
             request.user_id, request.exchange_provider_str, start_time
         )
+        
         processed_trading_histies = trading_histories_service.process_trading_histories(
             request.user_id, request.exchange_provider_str, trading_histies
         )
@@ -231,6 +232,8 @@ async def update_trading_history(
             )
         )
 
+        # 매매내역 업데이트가 성공적으로 완료되었으므로 업데이트 시간 갱신
+        # (저장된 거래내역이 없어도 업데이트 시간은 갱신)
         user_service.update_user_trading_history_updated_at(request.user_id)
 
         response_data = {

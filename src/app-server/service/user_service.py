@@ -5,6 +5,7 @@ from dto.user_dto import SignupRequest, SignupResponse, LoginResponse
 import bcrypt
 from datetime import datetime
 import pytz
+from utils.time_utils import get_current_korea_time
 
 
 class UserService:
@@ -91,7 +92,12 @@ class UserService:
     def update_user_trading_history_updated_at(self, user_id: str):
         try:
             user = self.user_repository.find_by_id(user_id)
-            setattr(user, "last_trading_history_update_at", datetime.now())
-            self.user_repository.save_user(user)
+            if user:
+                user.last_trading_history_update_at = get_current_korea_time()
+                self.user_repository.save_user(user)
+                self.logger.info(f"사용자 거래내역 업데이트 시간 갱신: user_id={user_id}")
+            else:
+                self.logger.warning(f"사용자를 찾을 수 없습니다: user_id={user_id}")
         except Exception as e:
+            self.logger.error(f"사용자 거래내역 업데이트 시간 갱신 실패: user_id={user_id}, error={e}")
             raise e
