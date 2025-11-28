@@ -20,6 +20,7 @@ class Coins(db.Base):
     trading_histories = relationship("TradingHistories", back_populates="coin")
     assets = relationship("Assets", back_populates="coin")
     coin_holdings_past = relationship("CoinHoldingsPast", back_populates="coin")
+    coin_prices_day = relationship("CoinPricesDay", back_populates="coin")
 
     def __repr__(self):
         return f"<Coin(id={self.id}, symbol={self.symbol}, market_code={self.market_code})>"

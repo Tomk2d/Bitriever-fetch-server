@@ -45,6 +45,7 @@ class DatabaseConnection:
         import model.TradingHistories
         import model.Assets
         import model.CoinHoldingsPast
+        import model.CoinPricesDay
 
         self.Base.metadata.create_all(bind=self.engine)
 
